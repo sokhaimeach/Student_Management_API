@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>EJS Example</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+</head>
+
+<body class="flex flex-col items-center">
+    <nav class="flex justify-center items-center bg-black text-white text-xl w-full h-[50px]">
+        <ul class="flex gap-6">
+            <li class="font-semibold text-rose-400 underline"><a href="#">Student</a></li>
+            <li class=""><a href="#">Subject</a></li>
+            <li class=""><a href="#">Major</a></li>
+        </ul>
+    </nav>
+    <div class="w-fit pt-4 flex flex-col items-end">
+        <button onclick="showModal('new')" id="openBtn" class="bg-black text-white rounded-xl px-4 py-2 font-semibold
+                     hover:scale-105 active:scale-95 transition-transform duration-150">
+            Add Student
+        </button>
+        <table class="border-collapse">
+            <caption class="caption-top">Student list</caption>
+            <thead class="bg-black text-white">
+                <tr>
+                    <th class="border border-zinc-300 px-3 py-1">Name</th>
+                    <th class="border border-zinc-300 px-3 py-1">Age</th>
+                    <th class="border border-zinc-300 px-3 py-1">Gender</th>
+                    <th class="border border-zinc-300 px-3 py-1">Major</th>
+                    <th class="border border-zinc-300 px-3 py-1">Phone</th>
+                    <th class="border border-zinc-300 px-3 py-1">Email</th>
+                    <th class="border border-zinc-300 px-3 py-1">Action</th>
+                </tr>
+            </thead>
+            <tbody class="">
+                <% students.forEach(function(student) { %>
+                    <tr>
+                        <td class="border border-zinc-300 px-3 py-1">
+                            <%= student.student_name %>
+                        </td>
+                        <td class="border border-zinc-300 px-3 py-1">
+                            <%= student.age %>
+                        </td>
+                        <td class="border border-zinc-300 px-3 py-1">
+                            <%= student.gender %>
+                        </td>
+                        <td class="border border-zinc-300 px-3 py-1">
+                            <%= student.major %>
+                        </td>
+                        <td class="border border-zinc-300 px-3 py-1">
+                            <%= student.contact.phone_number %>
+                        </td>
+                        <td class="border border-zinc-300 px-3 py-1">
+                            <%= student.contact.email %>
+                        </td>
+                        <td class="border border-zinc-300 px-3 py-1 flex">
+                            <form action="/student/<%= student.id %>" method="post">
+                                <button class="bg-rose-400 text-white text-xs p-1 rounded-sm hover:scale-105">Delete</button>
+                            </form>
+                            <button value="<%= student.id %>" class="bg-amber-400 ml-1 text-white text-xs p-1 rounded-sm updateBtn">Update</button>
+                        </td>
+                    </tr>
+                    <% }); %>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Modal (hidden by default) -->
+    <div id="modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50" aria-hidden="true">
+        <!-- Modal box: clicking it should NOT close modal -->
+        <div id="modalBox" class="bg-white rounded-xl p-6 w-full max-w-md mx-4 transform transition-all duration-200
+                scale-95 opacity-0">
+            <!-- Close button -->
+            <button id="closeBtn" class="absolute top-4 right-4 text-black text-xl" aria-label="Close">✖</button>
+
+            <h2 class="text-xl font-semibold mb-4">Add Student</h2>
+
+            <form id="studentForm" method="POST" class="flex flex-col gap-3">
+                <input name="student_name" type="text" placeholder="Name" required class="border px-3 py-2 rounded" />
+                <input name="age" type="number" placeholder="Age" required class="border px-3 py-2 rounded" />
+                <select name="gender" required class="border px-3 py-2 rounded">
+                    <option value="Male" selected>Male</option>
+                    <option value="Female">Female</option>
+                </select>
+                <input name="major" type="text" placeholder="Major" class="border px-3 py-2 rounded" />
+                <input name="contact.phone_number" type="text" placeholder="Phone" class="border px-3 py-2 rounded" />
+                <input name="contact.email" type="email" placeholder="Email" class="border px-3 py-2 rounded" />
+                <input name="contact.address.street" type="text" placeholder="Street" class="border px-3 py-2 rounded" />
+                <input name="contact.address.city" type="text" placeholder="City" class="border px-3 py-2 rounded" />
+
+                <div class="flex gap-2 mt-2">
+                    <button type="submit" id="submitData"
+                        class="flex-1 bg-black text-white py-2 rounded hover:scale-105 active:scale-95 transition">
+                        Save
+                    </button>
+                    <button type="button" id="cancelBtn" class="flex-1 border rounded py-2">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- JS -->
+    <script>
+        const openBtn = document.getElementById('openBtn');
+        const modal = document.getElementById('modal');
+        const modalBox = document.getElementById('modalBox');
+        const closeBtn = document.getElementById('closeBtn');
+        const cancelBtn = document.getElementById('cancelBtn');
+        const form = document.getElementById('studentForm');
+        const updateBtn = document.querySelectorAll('.updateBtn')
+
+        function showModal(condition) {
+            if(condition=='new'){
+                form.action = '/student'
+            } else {
+                form.action = '/student/update/'+condition;
+            }
+            console.log('Form : ',form.action);
+            // reveal overlay
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+
+            // animate modal box in
+            requestAnimationFrame(() => {
+                modalBox.classList.remove('scale-95', 'opacity-0');
+                modalBox.classList.add('scale-100', 'opacity-100');
+            });
+        }
+
+        function hideModal() {
+            // animate out first
+            modalBox.classList.remove('scale-100', 'opacity-100');
+            modalBox.classList.add('scale-95', 'opacity-0');
+
+            // wait for animation then hide overlay
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }, 190); // must be <= transition duration (200ms above)
+        }
+
+        // openBtn.addEventListener('click', showModal);
+        closeBtn.addEventListener('click', hideModal);
+        cancelBtn.addEventListener('click', hideModal);
+        updateBtn.forEach(btn => {
+            btn.addEventListener('click', () => {
+                showModal(btn.value);
+            })
+        })
+
+        // Close when clicking the backdrop (but not when clicking inside modalBox)
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                hideModal();
+            }
+        });
+
+        // Prevent modal click from bubbling to backdrop
+        modalBox.addEventListener('click', (e) => {
+            e.stopPropagation();
+        });
+
+        // Optional: close on Escape
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
+                hideModal();
+            }
+        });
+        
+    </script>
+
+</body>
+
+</html>

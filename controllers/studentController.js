@@ -3,10 +3,10 @@ const student = require("../models/student");
 const getStudent = async (req, res) => {
   try {
     const students = await student.find();
-    if (!students) {
+    if (students.length === 0) {
       return res.status(404).json({ message: "Student not found!" });
     }
-    return res.status(200).json(students);
+    return res.render("index", { students });
   } catch (err) {
     res.status(500).json({ message: "error get student : " + err });
   }
@@ -18,7 +18,8 @@ const createStudent = async (req, res) => {
     if (!reqStudent) {
       return res.status(400).json({ message: "Invalid student data!" });
     }
-    return res.status(201).json(reqStudent);
+    const students = await student.find();
+    return res.render("index", { students }); 
   } catch (err) {
     res.status(500).json({ message: "error create student : " + err });
   }
@@ -31,8 +32,8 @@ const updateStudent = async (req, res) => {
     if (!studentUpdate) {
       return res.status(404).json({ message: "Student not found!" });
     }
-    const students = await student.findById(id);
-    return res.status(200).json(students);
+    const students = await student.find();
+    return res.render("index", { students });
   } catch (err) {
     res.status(500).json({ message: "error update student : " + err });
   }
@@ -45,7 +46,8 @@ const deleteStudent = async (req, res) => {
     if (!studentDelete) {
       return res.status(404).json({ message: "Student not found!" });
     }
-    return res.status(200).json({ message: "Student deleted successfully!" });
+    const students = await student.find();
+    return res.render("index", { students }); 
   } catch (err) {
     res.status(500).json({ message: "error delete student : " + err });
   }
